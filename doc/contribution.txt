@@ -1,1 +1,22 @@
-Milestone 1 Contributions:Design discussion and features to include:Each team member participated in design discussion and together we decided all the features of our language.Generating grammar for the language (Abhinaw Sarang):Wrote initial grammar in basic text format, then modified it to create EBNF format grammar. EBNF format is required by the tool we will be using for lexer and parser. Further enhanced the grammar as issues got discovered while testing the grammar. Both formats of grammar are available in the design document.Future Contributions:Lexer and Parser using LARK (Abhinaw Sarang):Will be working on developing lexer and parser in Python using the LARK library. This will read the input program file and output a meaningful syntax tree.Writing sample programs and testing:Each team member will work on this.
+Milestone 1 Contributions:
+
+Design discussion and features to include:
+Each team member participated in design discussion and together we decided all the features of our language.
+
+Generating grammar for the language (Abhinaw Sarang):
+Wrote initial grammar in basic text format, then modified it to create EBNF format grammar. EBNF format is required by the tool we will be using for lexer and parser. Further enhanced the grammar as issues got discovered while testing the grammar. Both formats of grammar are available in the design document.
+
+POC on tools and libraries to fit project needs (Sagar Khar): 
+Did a PoC on explorer tools to see if it fits our requirement and how feasible it is to implement them in our project. Details are available in the design document.
+
+Future Contributions:
+
+Lexer and Parser using LARK (Abhinaw Sarang):
+Will be working on developing lexer and parser in Python using the LARK library. This will read the input program file and output a meaningful syntax tree.
+
+Evaluator function (Sagar Khar + Smit Dharmeshkumar Shah): 
+Will be working on writing a prolog program to take syntax trees as input and give meanings to different types on tree nodes, which will eventually return the result of the user program.
+
+Writing sample programs and testing:
+Each team member will work on this.
+
