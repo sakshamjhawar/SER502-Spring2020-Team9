@@ -12,6 +12,8 @@ Did a PoC on explorer tools to see if it fits our requirement and how feasible i
 Design Documentation (Saksham Jhawar): 
 Prepared a design that establishes constraints for the language being developed. This contains information regarding declarations, commands, control structures, data types, decision constructs, and operators. It also presents additional functionalities being developed along with the minimum requirements. This is followed by the language grammar in text and EBNF format. Furthermore, the justification of why the particular tools are being used is provided. Towards the end, the working of language is explained which is followed by the data structures being used and a couple of sample programs.
 
+Tools and libraries available for lexer and parsing (Smit Dharmeshkumar Shah): Explored multiple ways to do lexical analysis and parsing, using tools such as ANTLR, LARK or by own custom lexer and parser. Did thorough POC of ANTLR by writing a sample program.
+
 Future Contributions:
 
 Lexer and Parser using LARK (Abhinaw Sarang):
