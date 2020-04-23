@@ -1,4 +1,6 @@
 from lark import Lark
+from pyswip import Prolog
+import sys
 
 lark_parser = Lark(r'''
     program: block PEND
@@ -113,71 +115,19 @@ lark_parser = Lark(r'''
 
     ''', start='program', parser='lalr')
 
-text = '''
-    int num = 5;
-    string str = "hello";
-    bool flag = true;
-    string name;
-    int age;
-    bool isMarried;
-    print x;
-    End
-'''
+with open(sys.argv[1], 'r') as file:
+    text = file.read()
 
-# text = '''
-#     int x = 10;
-#     x = false ? 1 : 2;
-#     print x;
-#     for i in range(1,10) {
-#     int z = 2;
-#     print z;
-#     };
-#     string str;
-#     if (x/10 == 0) {
-#         str = "x is a " + "multiple of 10";
-#     print str;
-#     } else {
-#         str = "x is not a " + "multiple of 10";
-#     print str;
-#     };
-#     int y = 1;
-#     do {
-#             y = y * 10;
-#     } while (not(y == 100));
-#     print true;
-#     End
-# '''
-# 
-# text1 = '''
-#     print "Hello World!";
-#     int y = 1;
-#     for(int i = 0; i > x + 5; i = i / 3) {
-#     y = y * 10;
-#     if (x/10 == 0) {
-#         str = "x is a ” + “multiple of 10";
-#         print str;
-#     } elseif {
-#         str = "this is am middle piece";
-#     } else {
-#         str = "x is not a " + "multiple of 10";
-#         print str;
-#     };
-#     };
-#     int z = 5;
-#     while(z >= 1) {
-#         z = z -1;
-#     };
-#     End
-# '''
 generatedTree = lark_parser.parse(text)
 modifiedTree = str(generatedTree) \
                 .replace("Tree(", "tree(") \
                 .replace("Token(", "token(") \
                 .replace(" ","")
 print(modifiedTree)
-#tokens = []
-#l = list(lark_parser.lex(text1))
-#for each in l:
-#    tokens.append(each.value)
-#print(tokens)
 
+prolog = Prolog()
+prolog.consult("/Users/sarang/Downloads/novelC.pl")
+list(prolog.query('''run_program(''' + modifiedTree + ''')'''))
+
+
+## Program End
