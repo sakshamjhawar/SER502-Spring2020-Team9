@@ -22,22 +22,23 @@ eval_declarations(tree(declarations,[FirstDeclaration,_|RemDeclaration]), Initia
 
 %%=====Declaration====%%
 eval_single_declaration(tree(declaration,[token(_INT,'int'),token(_I,Identifier),_,token(_N,Val)]), InitialEnv, FinalEnv):-
-    FinalEnv = [(Identifier, Val)|InitialEnv].
+    atom_number(Val, NewVal),
+    updateEnv(Identifier,NewVal,InitialEnv,FinalEnv).
 
 eval_single_declaration(tree(declaration,[token(_STRING,'string'),token(_I,Identifier),_,token(_S,Val)]), InitialEnv, FinalEnv):-
-    FinalEnv = [(Identifier, Val)|InitialEnv].
+    updateEnv(Identifier,Val,InitialEnv,FinalEnv).
 
 eval_single_declaration(tree(declaration,[token(_BOOL,'bool'),token(_I,Identifier),_,token(_TRUE,Val)]), InitialEnv, FinalEnv):-
-    FinalEnv = [(Identifier, Val)|InitialEnv].
+    updateEnv(Identifier,Val,InitialEnv,FinalEnv).
 
 eval_single_declaration(tree(declaration,[token(_INT,'int'),token(_I,Identifier)]), InitialEnv, FinalEnv):-
-    FinalEnv = [(Identifier, 0)|InitialEnv].
+    updateEnv(Identifier,0,InitialEnv,FinalEnv).
 
 eval_single_declaration(tree(declaration,[token(_STRING,'string'),token(_I,Identifier)]), InitialEnv, FinalEnv):-
-    FinalEnv = [(Identifier, "")|InitialEnv].
+    updateEnv(Identifier,"",InitialEnv,FinalEnv).
 
 eval_single_declaration(tree(declaration,[token(_BOOL,'bool'),token(_I,Identifier)]), InitialEnv, FinalEnv):-
-    FinalEnv = [(Identifier, true)|InitialEnv].
+    updateEnv(Identifier,true,InitialEnv,FinalEnv).
 
 %%=====Commands======%%
 eval_commands(tree(commands,[SingleCommand]), InitialEnv, FinalEnv):-
@@ -50,35 +51,59 @@ eval_commands(tree(commands,[FirstCommand|RemCommand]), InitialEnv, FinalEnv):-
 
 %%=====Command If-Else======%%
 eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,CommandsTree1,_,_,_,_,_,_,_]),  InitialEnv, FinalEnv):-
-    eval_boolean(BooleanTree, InitialEnv, TempEnv, true),
-    eval_commands(CommandsTree1,TempEnv, FinalEnv).
+    eval_boolean(BooleanTree, InitialEnv, true),
+    eval_commands(CommandsTree1,InitialEnv, FinalEnv).
 eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,_,_,ElseifTree,_,_,CommandsTree2,_,_]),  InitialEnv, FinalEnv):-
-    eval_boolean(BooleanTree, InitialEnv, TempEnv, false),
-    eval_elseif(ElseifTree, TempEnv, TempEnv1, false),
-    eval_commands(CommandsTree2, TempEnv1, FinalEnv).
+    eval_boolean(BooleanTree, InitialEnv, false),
+    eval_elseif(ElseifTree, InitialEnv, TempEnv, false),
+    eval_commands(CommandsTree2, TempEnv, FinalEnv).
 eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,_,_,ElseifTree,_,_,_,_,_]),  InitialEnv, FinalEnv):-
-    eval_boolean(BooleanTree, InitialEnv, TempEnv, false),
-    eval_elseif(ElseifTree, TempEnv, TempEnv1, true),
-    FinalEnv = TempEnv1.
+    eval_boolean(BooleanTree, InitialEnv, false),
+    eval_elseif(ElseifTree, InitialEnv, TempEnv, true),
+    FinalEnv = TempEnv.
 
 %%=====Command While======%%
 eval_single_command(tree(command,[token(_WHILE,'while'),_,BooleanTree,_,_,CommandsTree,_,_]),  InitialEnv, FinalEnv):-
-    eval_boolean(BooleanTree, InitialEnv, TempEnv, true),
-    eval_commands(CommandsTree,TempEnv, TempEnv1),
+    eval_boolean(BooleanTree, InitialEnv, true),
+    eval_commands(CommandsTree,InitialEnv, TempEnv1),
     eval_single_command(tree(command,[token(_,'while'),_,BooleanTree,_,_,CommandsTree,_,_]),  TempEnv1, FinalEnv).
 eval_single_command(tree(command,[token(_WHILE,'while'),_,BooleanTree,_,_,_,_,_]),  InitialEnv, FinalEnv):-
-    eval_boolean(BooleanTree, InitialEnv, TempEnv, false),
-    FinalEnv = TempEnv.
+    eval_boolean(BooleanTree, InitialEnv, false),
+    FinalEnv = InitialEnv.
 
 %%=====Command Do-While======%%
 eval_single_command(tree(command,[token(_DO,'do'),_,CommandsTree,_,_,_,BooleanTree,_,_]),  InitialEnv, FinalEnv):-
     eval_commands(CommandsTree,InitialEnv, TempEnv),
-    eval_boolean(BooleanTree, TempEnv, TempEnv1, false),
-    FinalEnv = TempEnv1.
-eval_single_command(tree(command,[token(_DO,'do'),_,CommandsTree,_,_,_,BooleanTree,_,_]),  InitialEnv, FinalEnv):-
-    eval_commands(CommandsTree,InitialEnv, TempEnv),
-    eval_boolean(BooleanTree, TempEnv, TempEnv1, true),
-    eval_single_command(tree(command,[token(_,'do'),_,CommandsTree,_,_,_,BooleanTree,_,_]),  TempEnv1, FinalEnv).
+    %eval_boolean(BooleanTree, TempEnv, true),
+    eval_while_loop(CommandsTree,BooleanTree,  TempEnv, FinalEnv).
+    %eval_single_command(tree(command,[token(_,'do'),_,CommandsTree,_,_,_,BooleanTree,_,_]),  TempEnv, FinalEnv).
+
+%%========Traditional For-Loop=========%%
+eval_single_command(tree(command,[token(_FOR,'for'),_,_,token(_I,I),_,token(_N,N),_,BooleanTree,_,UpdateTree,_,_,CommandsTree,_,_]),  InitialEnv, FinalEnv):-
+    atom_number(N, NewN),
+    updateEnv(I, NewN, InitialEnv, TempEnv),
+    eval_for_loop(BooleanTree,UpdateTree,CommandsTree,TempEnv,FinalEnv).
+
+%%========For-Range Loop=========%%
+eval_single_command(tree(command,[token(_FOR,'for'),token(_I,I),_,_,_,token(_N1,N1),_,token(_N2,N2),_,_,CommandsTree,_,_]), InitialEnv, FinalEnv):-
+    atom_number(N1,NewN1),
+    atom_number(N2,NewN2),
+    updateEnv(I, NewN1, InitialEnv, TempEnv),
+    eval_range_loop(I,NewN1,NewN2,CommandsTree, TempEnv, FinalEnv).
+
+%%======= I = Exp =========%%
+eval_single_command(tree(command,[token(_I,I),_,ExpressionTree,_]), InitialEnv, FinalEnv):-
+    eval_expr(ExpressionTree,InitialEnv,Value),
+    updateEnv(I,Value,InitialEnv,FinalEnv).
+
+%%======= I = Ter =========%%
+eval_single_command(tree(command,[token(_I,I),_,TernaryTree,_]), InitialEnv, FinalEnv):-
+    eval_ternary(TernaryTree,InitialEnv,Value),
+    updateEnv(I,Value,InitialEnv,FinalEnv).
+
+%%======= Declaration inside command==%%
+eval_single_command(tree(command,[DeclarationsTree]), InitialEnv, FinalEnv):-
+    eval_declarations(DeclarationsTree, InitialEnv, FinalEnv).
 
 %%=====Command Print======%%
 eval_single_command(tree(command,[token(_PRINT,print),ValuesTree,_]), InitialEnv, FinalEnv):-
@@ -87,19 +112,152 @@ eval_single_command(tree(command,[token(_PRINT,print),ValuesTree,_]), InitialEnv
     write(Value),
     nl.
 
-%%======= I = Exp =========%%
-eval_single_command(tree(command,[token(_I,I),_,ExpressionTree,_]), InitialEnv, FinalEnv):-
-    eval_expr(ExpressionTree,InitialEnv,TempEnv,Value),
-     (I,Value,TempEnv,FinalEnv).
+%%======= For Helper======%%
+eval_for_loop(BooleanTree,UpdateTree,CommandsTree,TempEnv,FinalEnv):-
+    eval_boolean(BooleanTree, TempEnv, true),
+    eval_commands(CommandsTree,TempEnv, TempEnv1),
+    eval_update_expr(UpdateTree, TempEnv1, TempEnv2),
+    eval_for_loop(BooleanTree,UpdateTree,CommandsTree,TempEnv2,FinalEnv).
 
-%%======= I = Ter =========%%
-eval_single_command(tree(command,[token(_I,I),_,TernaryTree,_]), InitialEnv, FinalEnv).
+eval_for_loop(BooleanTree,_UpdateTree,_CommandsTree,TempEnv,FinalEnv):-
+    eval_boolean(BooleanTree, TempEnv, false),
+    FinalEnv = TempEnv.
 
-%%======= Declaration inside command==%%
-eval_single_command(tree(command,[DeclarationsTree]), InitialEnv, FinalEnv).
+eval_range_loop(_I,N1,N2,_CommandsTree, InitialEnv, FinalEnv):-
+    N1 >= N2,
+    FinalEnv = InitialEnv.
 
-%%========Traditional For-Loop=========%%
-eval_single_command(tree(command,[token(_FOR,'for'),_,_,I,_,N,_,BooleanTree,_,UpdateTree,_,_,CommandsTree,_,_]),  InitialEnv, FinalEnv).
+eval_range_loop(I,N1,N2,CommandsTree, InitialEnv, FinalEnv):-
+    N1 < N2,
+    eval_commands(CommandsTree, InitialEnv, TempEnv),
+    NewN1 is N1+1,
+    updateEnv(I,NewN1,TempEnv,TempEnv1),
+    eval_range_loop(I,NewN1,N2,CommandsTree, TempEnv1, FinalEnv).
 
-%%========For-Range Loop=========%%
-eval_single_command(tree(command,[token(_FOR,'for'),token(_I,I),_,_,_,token(_N,N1),,_,token(_N,N2),,_,_,CommandsTree,_,_]), InitialEnv, FinalEnv).
+%%========= do-while helper======%%
+eval_while_loop(CommandsTree,BooleanTree,  InitialEnv, FinalEnv):-
+    eval_boolean(BooleanTree, InitialEnv, true),
+    eval_commands(CommandsTree,InitialEnv, TempEnv),
+    eval_while_loop(CommandsTree,BooleanTree,  TempEnv, FinalEnv).
+eval_while_loop(_CommandsTree,BooleanTree,  InitialEnv, FinalEnv):-
+    eval_boolean(BooleanTree, InitialEnv, false),
+    FinalEnv = InitialEnv.
+
+%%======Else-If=======%%
+eval_elseif(tree(elseif,[]),InitialEnv,InitialEnv,false).
+eval_elseif(tree(elseif,[token(_ELIF,'elif'),_,BooleanTree,_,_,CommandsTree,_|_RemElseIf]), InitialEnv, FinalEnv, Status):-
+    eval_boolean(BooleanTree, InitialEnv, true),
+    eval_commands(CommandsTree,InitialEnv, FinalEnv),
+    Status = true.
+eval_elseif(tree(elseif,[token(_ELIF,'elif'),_,BooleanTree,_,_,_CommandsTree,_|RemElseIf]), InitialEnv, FinalEnv, Status):-
+    eval_boolean(BooleanTree, InitialEnv, false),
+    eval_elseif(tree(elseif,RemElseIf), InitialEnv, FinalEnv, Status).
+
+%%=====Boolean=======%%
+eval_boolean(tree(boolean,[token(_TRUE,'true')]),_InitialEnv,true).
+eval_boolean(tree(boolean,[token(_FALSE,'false')]),_InitialEnv,false).
+
+%%=====Boolean Equals=======%%
+eval_boolean(tree(boolean,[MathExprTree1,token(_EQUALS,'=='),MathExprTree2]),InitialEnv,true):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 = Value2.
+eval_boolean(tree(boolean,[MathExprTree1,token(_EQUALS,'=='),MathExprTree2]),InitialEnv,false):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 \= Value2.
+
+%%=====Boolean Not Equals=======%%
+eval_boolean(tree(boolean,[MathExprTree1,token(_NOTEQUALS,'!='),MathExprTree2]),InitialEnv,true):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 \= Value2.
+eval_boolean(tree(boolean,[MathExprTree1,token(_NOTEQUALS,'!='),MathExprTree2]),InitialEnv,false):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 = Value2.
+
+%%=====Boolean Less Than=======%%
+eval_boolean(tree(boolean,[MathExprTree1,token(_LT,'<'),MathExprTree2]),InitialEnv,true):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 < Value2.
+eval_boolean(tree(boolean,[MathExprTree1,token(_LT,'<'),MathExprTree2]),InitialEnv,false):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 >= Value2.
+
+%%=====Boolean Less Than Equals=======%%
+eval_boolean(tree(boolean,[MathExprTree1,token(_LTE,'<='),MathExprTree2]),InitialEnv,true):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 =< Value2.
+eval_boolean(tree(boolean,[MathExprTree1,token(_LTE,'<='),MathExprTree2]),InitialEnv,false):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 > Value2.
+
+%%=====Boolean Greater Than=======%%
+eval_boolean(tree(boolean,[MathExprTree1,token(_GT,'>'),MathExprTree2]),InitialEnv,true):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 > Value2.
+eval_boolean(tree(boolean,[MathExprTree1,token(_GT,'>'),MathExprTree2]),InitialEnv,false):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 =< Value2.
+
+%%=====Boolean Greater Than Equals>=======%%
+eval_boolean(tree(boolean,[MathExprTree1,token(_GTE,'>='),MathExprTree2]),InitialEnv,true):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 >= Value2.
+eval_boolean(tree(boolean,[MathExprTree1,token(_GTE,'>='),MathExprTree2]),InitialEnv,false):-
+    eval_math_expr(MathExprTree1, InitialEnv, Value1),
+    eval_math_expr(MathExprTree2, InitialEnv, Value2),
+    Value1 < Value2.
+
+%%=====Boolean String Equals=======%%
+eval_boolean(tree(boolean,[StringExprTree1,token(_EQUALS,'=='),StringExprTree2]),_InitialEnv,true):-
+    eval_string_expr(StringExprTree1, Value1),
+    eval_string_expr(StringExprTree2, Value2),
+    Value1 = Value2.
+eval_boolean(tree(boolean,[StringExprTree1,token(_EQUALS,'=='),StringExprTree2]),_InitialEnv,false):-
+    eval_string_expr(StringExprTree1, Value1),
+    eval_string_expr(StringExprTree2, Value2),
+    Value1 \= Value2.
+
+%%=====Boolean - Boolean Expression=======%%
+eval_boolean(tree(boolean,[BooleanExpr]),InitialEnv,Value):-
+    eval_boolean_expr(BooleanExpr, InitialEnv, Value).
+
+%%=====Update expression===%%
+eval_update_expr(tree(updateexp,[token(_I,I),token(_DPLUS,'++')]), InitialEnv, FinalEnv):-
+    lookupEnv(I,InitialEnv,Value),
+    NewValue is Value + 1,
+    updateEnv(I,NewValue,InitialEnv,FinalEnv).
+eval_update_expr(tree(updateexp,[token(_I,I),token(_DMINUS,'--')]), InitialEnv, FinalEnv):-
+    lookupEnv(I,InitialEnv,Value),
+    NewValue is Value - 1,
+    updateEnv(I,NewValue,InitialEnv,FinalEnv).
+eval_update_expr(tree(updateexp,[token(_I,I),_,MathExprTree]), InitialEnv, FinalEnv):-
+    eval_math_expr(MathExprTree, InitialEnv, Value),
+    updateEnv(I,Value,InitialEnv,FinalEnv).
+
+%%======Update Env=======%%
+updateEnv(Key,Value,InitialEnv, FinalEnv):-
+    select((Key,_),InitialEnv,TempEnv),
+    FinalEnv = [(Key,Value)|TempEnv].
+
+updateEnv(Key,Value,InitialEnv, FinalEnv):-
+    \+ select((Key,_),InitialEnv,_),
+    FinalEnv = [(Key,Value)|InitialEnv].
+
+%%======Lookup Env=======%%
+lookupEnv(Key,[],Key):- write(Key), write( not ), write(found).
+lookupEnv(Key,[(Key,Value)|_],Value).
+lookupEnv(Key,[(K1,_)|T],Value):-
+    Key \= K1,
+    lookupEnv(Key,T,Value).
+
+%%=============================End of Program======================================%%
