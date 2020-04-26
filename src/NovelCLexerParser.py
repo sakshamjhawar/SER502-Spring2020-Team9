@@ -1,5 +1,5 @@
 from lark import Lark
-from pyswip import Prolog
+#from pyswip import Prolog
 import sys
 
 lark_parser = Lark(r'''
@@ -41,7 +41,7 @@ lark_parser = Lark(r'''
             | stringexp EQUALS stringexp
             | boolexp
             
-    updateexp : I ASSIGN exp
+    updateexp : I ASSIGN mathexp
             | I DPLUS
             | I DMINUS
             
@@ -50,7 +50,7 @@ lark_parser = Lark(r'''
             | mathexp MUL mathexp
             | mathexp DIV mathexp
             | OBRAC mathexp CBRAC
-            | I | N
+            | identifier | number
                 
     stringexp : stringexp ADD stringexp | S
     
@@ -64,6 +64,10 @@ lark_parser = Lark(r'''
     ter : boolean TIF exp TELSE exp
     
     values : I | N | S | boolean
+    
+    identifier: I
+    
+    number: N
     
     BEND : "BEnd"
     PEND : "End"
@@ -124,10 +128,3 @@ modifiedTree = str(generatedTree) \
                 .replace("Token(", "token(") \
                 .replace(" ","")
 print(modifiedTree)
-
-prolog = Prolog()
-prolog.consult("/Users/sarang/Downloads/novelC.pl")
-list(prolog.query('''run_program(''' + modifiedTree + ''')'''))
-
-
-## Program End
