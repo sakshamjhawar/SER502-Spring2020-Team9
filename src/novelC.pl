@@ -152,8 +152,8 @@ eval_elseif(tree(elseif,[token(_ELIF,'elif'),_,BooleanTree,_,_,_CommandsTree,_|R
     eval_elseif(tree(elseif,RemElseIf), InitialEnv, FinalEnv, Status).
 
 %%=====Boolean=======%%
-eval_boolean(tree(boolean,[token(_TRUE,'true')]),_InitialEnv,true).
-eval_boolean(tree(boolean,[token(_FALSE,'false')]),_InitialEnv,false).
+eval_boolean(tree(boolean,[token(_TRUE,true)]),_InitialEnv,true).
+eval_boolean(tree(boolean,[token(_FALSE,false)]),_InitialEnv,false).
 
 %%=====Boolean Equals=======%%
 eval_boolean(tree(boolean,[MathExprTree1,token(_EQUALS,'=='),MathExprTree2]),InitialEnv,true):-
@@ -311,9 +311,34 @@ eval_boolean2_expr(tree(boolexp,[token(_NOT,'not'),BooleanTree]), InitialEnv, tr
     eval_boolean(BooleanTree,InitialEnv,false).
 eval_boolean2_expr(X, InitialEnv, false):- eval_boolean3_expr(X, InitialEnv, false).
 
-eval_boolean3_expr(tree(boolexp,[_,BooleanTree,_]), InitialEnv, false):-
-    eval_boolean_expr(BooleanTree, InitialEnv, false).
+eval_boolean3_expr(tree(boolexp,[_,BooleanTree,_]), InitialEnv, Val):-
+    eval_boolean(BooleanTree, InitialEnv, Val).
+eval_boolean3_expr(tree(boolean,BooleanTree), InitialEnv, Val):-
+    eval_boolean(tree(boolean,BooleanTree), InitialEnv, Val).
 
+%%=====All expressions===%%
+eval_expr(tree(exp,[StrExprToken]),_InitialEnv,Value):-
+    eval_string_expr(StrExprToken, Value).
+eval_expr(tree(exp,[BoolExprToken]),InitialEnv,Value):-
+    eval_boolean_expr(BoolExprToken, InitialEnv, Value).
+eval_expr(tree(exp,[MathExprToken]),InitialEnv,Value):-
+    eval_math_expr(MathExprToken, InitialEnv, Value).
+
+%%=====ternary expression===%%
+eval_ternary(tree(ter,[BooleanTree,_,ExprTree,_,_]),InitialEnv,Value):-
+    eval_boolean(BooleanTree, InitialEnv, true),
+    eval_expr(ExprTree,InitialEnv,Value).
+eval_ternary(tree(ter,[BooleanTree,_,_,_,ExprTree]),InitialEnv,Value):-
+    eval_boolean(BooleanTree, InitialEnv, false),
+    eval_expr(ExprTree,InitialEnv,Value).
+
+%%=====Values======%%
+eval_values(tree(values,[tree(identifier,[token(_I,Id)])]), Env, Value):-
+    lookupEnv(Id,Env,Value).
+eval_values(tree(values,[tree(str,[token(_S,Value)])]), _Env, Value).
+eval_values(tree(values,[tree(boolean,[token(_,Value)])]), _Env, Value).
+eval_values(tree(values,[tree(number,[token(_N,Value)])]), _Env, NewValue):-
+    atom_number(Value ,NewValue).
 %%======Update Env=======%%
 updateEnv(Key,Value,InitialEnv, FinalEnv):-
     select((Key,_),InitialEnv,TempEnv),
