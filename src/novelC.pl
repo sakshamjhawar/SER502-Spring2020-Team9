@@ -1,3 +1,22 @@
+%%
+This is evalutor for the language, takes syntax tree as input and print the results.
+@author  : smit shah
+@version : 0.1
+@date    : 04-25-2020
+
+@author  : saksham jhawar
+@version : 0.2
+@date    : 04-25-2020
+
+@author  : sagar khar
+@version : 0.3
+@date    : 04-26-2020
+
+@author  : abhinaw sarang
+@version : 0.4
+@date    : 04-26-2020
+%%
+
 run_program(P):- eval_program(P, []).
 
 eval_program(tree(program,[BlockTree,_]), InitialEnv):-

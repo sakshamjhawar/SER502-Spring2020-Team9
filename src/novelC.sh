@@ -1,5 +1,8 @@
 #!/bin/bash
 # This is runtime script, takes program file as 1st argument.
+# author: saksham jhawar
+# version 1.0
+# date 04-24-2020
 #start=$(date +%s)
 echo "Compiling..."
 echo

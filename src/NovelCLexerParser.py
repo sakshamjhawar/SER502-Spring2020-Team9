@@ -1,3 +1,10 @@
+"""
+    This is Lark based lexar and parser, grammar is also defined in this.
+    Taken user program file as input and returns prolog compatible syntax tree.
+    @author: abhinaw sarang
+    @version: 1.0
+    @since: 04-27-202
+"""
 from lark import Lark
 import sys
 from jinja2 import lexer
@@ -118,10 +125,9 @@ lark_parser = Lark(r'''
     %import common.SIGNED_NUMBER -> N
     %import common.WORD -> I
     
-    
     %ignore WHITE
     
-    ''', start='program')
+    ''', start='program', parser='lalr')
 
 with open(sys.argv[1], 'r') as file:
     text = file.read()
