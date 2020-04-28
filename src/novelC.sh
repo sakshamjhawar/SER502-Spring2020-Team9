@@ -3,12 +3,27 @@
 #start=$(date +%s)
 echo "Compiling..."
 echo
-output=$(python NovelCLexerParser.py $1)
+output1=$(python NovelCLexerParser.py ../data/constraints13.nc)
+output2=$(python NovelCLexerParser.py ../data/factorail.nc)
+output3=$(python NovelCLexerParser.py ../data/fibonacci.nc)
+output4=$(python NovelCLexerParser.py ../data/sum20num.nc)
 echo "Compilation successful!"
 echo
 echo "Interpreting..."
 echo
-swipl -s novelC.pl -g "run_program($output), halt."
+echo "contraints 1-3"
+swipl -s novelC.pl -g "run_program($output1), halt."
+echo "-------------------------------------------------------"
+echo "factorail"
+swipl -s novelC.pl -g "run_program($output2), halt."
+echo "-------------------------------------------------------"
+echo "fibonacci"
+swipl -s novelC.pl -g "run_program($output3), halt."
+echo "-------------------------------------------------------"
+echo "sum20num"
+swipl -s novelC.pl -g "run_program($output4), halt."
+echo "-------------------------------------------------------"
+sleep 20
 echo
 #duration=$(echo "$(date +%s) - $start" | bc)
 #execution_time=`printf "%.8f seconds" $duration`
