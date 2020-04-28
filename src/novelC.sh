@@ -1,15 +1,45 @@
 #!/bin/bash
-# This is runtime script, takes program file as 1st argument.
-start=$(date +%s)
 echo "Compiling..."
 echo
-output=$(python NovelCLexerParser.py Sample1.nc)
+output1=$(python NovelCLexerParser.py ../data/constraints13.nc)
+output2=$(python NovelCLexerParser.py ../data/factorial.nc)
+output3=$(python NovelCLexerParser.py ../data/fibonacci.nc)
+output4=$(python NovelCLexerParser.py ../data/sum20num.nc)
+output5=$(python NovelCLexerParser.py ../data/compare2num.nc)
 echo "Compilation successful!"
 echo
 echo "Interpreting..."
 echo
-swipl -s novelC.pl -g "run_program($output), halt."
+Sleep 1
+echo "-------------------------------------------------------"
+echo "Contraints13 Program"
+echo "-------------------------------------------------------"
+swipl -s novelC.pl -g "run_program($output1), halt."
 echo
-duration=$(echo "$(date +%s) - $start" | bc)
-execution_time=`printf "%.8f seconds" $duration`
+sleep 1
+echo "-------------------------------------------------------"
+echo "Factorial Program"
+echo "-------------------------------------------------------"
+swipl -s novelC.pl -g "run_program($output2), halt."
+echo
+sleep 1
+echo "-------------------------------------------------------"
+echo "Fibonacci Program"
+echo "-------------------------------------------------------"
+swipl -s novelC.pl -g "run_program($output3), halt."
+echo
+sleep 1
+echo "-------------------------------------------------------"
+echo "Sum of 20 Numbers Program"
+echo "-------------------------------------------------------"
+swipl -s novelC.pl -g "run_program($output4), halt."
+echo
+sleep 1
+echo "-------------------------------------------------------"
+echo "Compare 2 Numbers Program(n=5, m=5)"
+echo "-------------------------------------------------------"
+swipl -s novelC.pl -g "run_program($output5), halt."
+
+echo "-------------------------------------------------------"
+sleep 1
 echo "Done!"

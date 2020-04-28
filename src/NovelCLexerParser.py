@@ -1,6 +1,6 @@
 from lark import Lark
-#from pyswip import Prolog
 import sys
+from jinja2 import lexer
 
 lark_parser = Lark(r'''
     program: block PEND
@@ -63,12 +63,15 @@ lark_parser = Lark(r'''
     
     ter : boolean TIF exp TELSE exp
     
-    values : I | N | S | boolean
+    values : identifier | number | str | boolean
     
     identifier: I
     
     number: N
     
+    str:  S
+    
+    SPACE : " "
     BEND : "BEnd"
     PEND : "End"
     SEMI : ";"
@@ -109,22 +112,23 @@ lark_parser = Lark(r'''
     TELSE    : ":"
     TRUE    : "true"
     FALSE    : "false"
-    
-    
+    WHITE : /\s+(?=([^\"]*[\"][^\"]*[\"])*[^\"]*$)/
+     
     %import common.ESCAPED_STRING -> S
     %import common.SIGNED_NUMBER -> N
     %import common.WORD -> I
-    %import common.WS
-    %ignore WS
-
-    ''', start='program', parser='lalr')
+    
+    
+    %ignore WHITE
+    
+    ''', start='program')
 
 with open(sys.argv[1], 'r') as file:
     text = file.read()
 
 generatedTree = lark_parser.parse(text)
+
 modifiedTree = str(generatedTree) \
                 .replace("Tree(", "tree(") \
-                .replace("Token(", "token(") \
-                .replace(" ","")
+                .replace("Token(", "token(")
 print(modifiedTree)
