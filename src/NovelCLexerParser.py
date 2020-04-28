@@ -121,7 +121,7 @@ lark_parser = Lark(r'''
     
     %ignore WHITE
     
-    ''', start='program')
+    ''', start='program', parser='lalr')
 
 with open(sys.argv[1], 'r') as file:
     text = file.read()
