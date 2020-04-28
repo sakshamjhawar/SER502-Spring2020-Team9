@@ -1,3 +1,22 @@
+%%
+%This is evalutor for the language, takes syntax tree as input and print the results.
+%@author  : smit shah
+%@version : 0.1
+%@date    : 04-25-2020
+%
+%@author  : saksham jhawar
+%@version : 0.2
+%@date    : 04-25-2020
+%
+%@author  : sagar khar
+%@version : 0.3
+%@date    : 04-26-2020
+%
+%@author  : abhinaw sarang
+%@version : 0.4
+%@date    : 04-26-2020
+%%
+
 run_program(P):- eval_program(P, []).
 
 eval_program(tree(program,[BlockTree,_]), InitialEnv):-
@@ -55,12 +74,12 @@ eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,CommandsTree
     eval_commands(CommandsTree1,InitialEnv, FinalEnv).
 eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,_,_,ElseifTree,_,_,CommandsTree2,_,_]),  InitialEnv, FinalEnv):-
     eval_boolean(BooleanTree, InitialEnv, false),
-    eval_elseif(ElseifTree, InitialEnv, TempEnv, false),
-    eval_commands(CommandsTree2, TempEnv, FinalEnv).
-eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,_,_,ElseifTree,_,_,_,_,_]),  InitialEnv, FinalEnv):-
-    eval_boolean(BooleanTree, InitialEnv, false),
-    eval_elseif(ElseifTree, InitialEnv, TempEnv, true),
-    FinalEnv = TempEnv.
+    eval_elseif(ElseifTree,CommandsTree2, InitialEnv, FinalEnv).
+%    eval_commands(CommandsTree2, TempEnv, FinalEnv).
+%eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,_,_,ElseifTree,_,_,_,_,_]),  InitialEnv, FinalEnv):-
+%    eval_boolean(BooleanTree, InitialEnv, false),
+%    eval_elseif(ElseifTree, InitialEnv, TempEnv, Status),
+%    FinalEnv = TempEnv.
 
 %%=====Command While======%%
 eval_single_command(tree(command,[token(_WHILE,'while'),_,BooleanTree,_,_,CommandsTree,_,_]),  InitialEnv, FinalEnv):-
@@ -142,14 +161,17 @@ eval_while_loop(_CommandsTree,BooleanTree, InitialEnv, FinalEnv):-
     FinalEnv = InitialEnv.
 
 %%======Else-If=======%%
-eval_elseif(tree(elseif,[]),InitialEnv,InitialEnv,false).
-eval_elseif(tree(elseif,[token(_ELIF,'elif'),_,BooleanTree,_,_,CommandsTree,_|_RemElseIf]), InitialEnv, FinalEnv, Status):-
-    eval_boolean(BooleanTree, InitialEnv, true),
-    eval_commands(CommandsTree,InitialEnv, FinalEnv),
-    Status = true.
-eval_elseif(tree(elseif,[token(_ELIF,'elif'),_,BooleanTree,_,_,_CommandsTree,_|RemElseIf]), InitialEnv, FinalEnv, Status):-
+eval_elseif(tree(elseif,[]), CommandsTree, InitialEnv, FinalEnv):-
+    eval_commands(CommandsTree,InitialEnv, FinalEnv).
+
+eval_elseif(tree(elseif,[token(_ELIF,'elif'),_,BooleanTree,_,_,_CommandsTree,_|RemElseIf]), CommandsTree2, InitialEnv, FinalEnv):-
     eval_boolean(BooleanTree, InitialEnv, false),
-    eval_elseif(tree(elseif,RemElseIf), InitialEnv, FinalEnv, Status).
+    eval_elseif(tree(elseif,RemElseIf),CommandsTree2, InitialEnv, FinalEnv).
+
+eval_elseif(tree(elseif,[token(_ELIF,'elif'),_,BooleanTree,_,_,CommandsTree,_|_RemElseIf]), _CommandsTree2, InitialEnv, FinalEnv):-
+    eval_boolean(BooleanTree, InitialEnv, true),
+    eval_commands(CommandsTree,InitialEnv, FinalEnv).
+
 
 %%=====Boolean=======%%
 eval_boolean(tree(boolean,[token(_TRUE,true)]),_InitialEnv,true).

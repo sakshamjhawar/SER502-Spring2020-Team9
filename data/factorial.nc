@@ -5,5 +5,6 @@ while(i >= 1) {
   factorail = factorail*i;
   i=i-1;
 };
+print "Factorial of 7 is:";
 print factorail;
 End
