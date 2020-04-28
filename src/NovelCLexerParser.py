@@ -7,7 +7,6 @@
 """
 from lark import Lark
 import sys
-from jinja2 import lexer
 
 lark_parser = Lark(r'''
     program: block PEND

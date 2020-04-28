@@ -15,6 +15,10 @@
 %@author  : abhinaw sarang
 %@version : 0.4
 %@date    : 04-26-2020
+%
+%@author  : saksham jhawar
+%@version : 1.0
+%@date    : 04-28-2020
 %%
 
 run_program(P):- eval_program(P, []).
@@ -75,11 +79,6 @@ eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,CommandsTree
 eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,_,_,ElseifTree,_,_,CommandsTree2,_,_]),  InitialEnv, FinalEnv):-
     eval_boolean(BooleanTree, InitialEnv, false),
     eval_elseif(ElseifTree,CommandsTree2, InitialEnv, FinalEnv).
-%    eval_commands(CommandsTree2, TempEnv, FinalEnv).
-%eval_single_command(tree(command,[token(_IF,'if'),_,BooleanTree,_,_,_,_,ElseifTree,_,_,_,_,_]),  InitialEnv, FinalEnv):-
-%    eval_boolean(BooleanTree, InitialEnv, false),
-%    eval_elseif(ElseifTree, InitialEnv, TempEnv, Status),
-%    FinalEnv = TempEnv.
 
 %%=====Command While======%%
 eval_single_command(tree(command,[token(_WHILE,'while'),_,BooleanTree,_,_,CommandsTree,_,_]),  InitialEnv, FinalEnv):-
