@@ -14,16 +14,16 @@ Prepared a design that establishes constraints for the language being developed.
 
 Tools and libraries available for lexer and parsing (Smit Dharmeshkumar Shah): Explored multiple ways to do lexical analysis and parsing, using tools such as ANTLR, LARK or by own custom lexer and parser. Did thorough POC of ANTLR by writing a sample program.
 
-Future Contributions:
+Milestone 2 Contributions:
 
 Lexer and Parser using LARK (Abhinaw Sarang):
-Will be working on developing lexer and parser in Python using the LARK library. This will read the input program file and output a meaningful syntax tree.
+Developed lexer and parser in Python using the LARK library. This will read the input program file and output a meaningful syntax tree. Also contributed by writing few evalutors in prolog.
 
 Evaluator function (Sagar Khar + Smit Dharmeshkumar Shah): 
-Will be working on writing a prolog program to take syntax trees as input and give meanings to different types on tree nodes, which will eventually return the result of the user program.
+Developed a prolog program to take syntax trees as input and give meanings to different types on tree nodes, which will eventually return the result of the user program.
 
-Bash script for complete working (Saksham Jhawar): Will be developing a bash script to provide an installation and runtime environment for novelC. It will take a program file as input then call the lexer and parser to generate a parse tree. Once a parse tree is generated, the script will then provide this as an input to the Evaluator function (Prolog file). Lastly, the user would be able to view the output on the console.
+Bash script for complete working (Saksham Jhawar): Developed a bash script to provide a runtime environment for novelC. It will take a program file as input then call the lexer and parser to generate a parse tree. Once a parse tree is generated, the script will then provide this as an input to the Evaluator function (Prolog file). Lastly, the user would be able to view the output on the console. Also contributed by writing few evalutors in prolog.
 
 Writing sample programs and testing:
-Each team member will work on this.
+Each team member worked on this.
 
