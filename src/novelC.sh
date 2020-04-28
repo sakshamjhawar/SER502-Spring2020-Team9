@@ -3,7 +3,8 @@
 start=$(date +%s)
 echo "Compiling..."
 echo
-output=$(python NovelCLexerParser.py Sample1.nc)
+inputFile = $1
+output=$(python NovelCLexerParser.py inputFile)
 echo "Compilation successful!"
 echo
 echo "Interpreting..."
