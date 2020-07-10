@@ -23,4 +23,4 @@ Directions/instructions to build and run the language (compiler/runtime)
     - Note: The extension should be .nc
 
 Link to the YouTube video
-  - https://youtu.be/yAy-lxSOkrM 
+  - Drop us an email to get the link to video demonstration. 
